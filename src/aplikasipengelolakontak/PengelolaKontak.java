@@ -5,11 +5,21 @@
 package aplikasipengelolakontak;
 
 import aplikasipengelolakontak.DatabaseHelper;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -24,7 +34,10 @@ public class PengelolaKontak extends javax.swing.JFrame {
         initComponents();
         DatabaseHelper.createTable();
         TampilData();
+        tblKontak.setModel(model);
+        bersih();
     }
+    DefaultTableModel model = new DefaultTableModel(new String[]{"ID", "Nama", "Nomor", "Kategori"}, 0);
     
     /**
      * This method is called from within the constructor to initialize the form.
@@ -45,12 +58,14 @@ public class PengelolaKontak extends javax.swing.JFrame {
         jButton2 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
+        nomor = new javax.swing.JTextField();
+        nama = new javax.swing.JTextField();
+        cari = new javax.swing.JTextField();
+        cKategori = new javax.swing.JComboBox<>();
         jScrollPane1 = new javax.swing.JScrollPane();
         tblKontak = new javax.swing.JTable();
-        notelp = new javax.swing.JTextField();
-        nama = new javax.swing.JTextField();
-        jTextField3 = new javax.swing.JTextField();
-        cKategori = new javax.swing.JComboBox<>();
+        jButton5 = new javax.swing.JButton();
+        jButton6 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -80,8 +95,32 @@ public class PengelolaKontak extends javax.swing.JFrame {
         });
 
         jButton3.setText("Hapus");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
 
         jButton4.setText("Cari");
+        jButton4.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton4ActionPerformed(evt);
+            }
+        });
+
+        nomor.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                nomorActionPerformed(evt);
+            }
+        });
+
+        cari.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                cariKeyReleased(evt);
+            }
+        });
+
+        cKategori.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Plih Kategori", "Keluarga", "Teman", "Rekan Kerja" }));
 
         tblKontak.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -94,24 +133,38 @@ public class PengelolaKontak extends javax.swing.JFrame {
                 "Title 1", "Title 2", "Title 3", "Title 4"
             }
         ));
+        tblKontak.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                tblKontakMouseClicked(evt);
+            }
+        });
         jScrollPane1.setViewportView(tblKontak);
 
-        notelp.addActionListener(new java.awt.event.ActionListener() {
+        jButton5.setText("Impor");
+        jButton5.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                notelpActionPerformed(evt);
+                jButton5ActionPerformed(evt);
             }
         });
 
-        cKategori.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        jButton6.setText("Ekspor");
+        jButton6.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton6ActionPerformed(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(147, Short.MAX_VALUE)
+                .addComponent(jLabel1)
+                .addGap(145, 145, 145))
+            .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 500, Short.MAX_VALUE)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(2, 2, 2)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -125,8 +178,11 @@ public class PengelolaKontak extends javax.swing.JFrame {
                                     .addComponent(jLabel5))
                                 .addGap(12, 12, 12)
                                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(jTextField3)
-                                    .addComponent(notelp)
+                                    .addGroup(jPanel1Layout.createSequentialGroup()
+                                        .addComponent(jButton6)
+                                        .addGap(0, 0, Short.MAX_VALUE))
+                                    .addComponent(cari)
+                                    .addComponent(nomor)
                                     .addComponent(cKategori, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                         .addGap(18, 18, 18)
                         .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -136,12 +192,12 @@ public class PengelolaKontak extends javax.swing.JFrame {
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addComponent(jLabel4)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButton4)))
+                        .addComponent(jButton4))
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jButton5)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(jLabel1)
-                .addGap(145, 145, 145))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -157,7 +213,7 @@ public class PengelolaKontak extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3)
                     .addComponent(jButton2)
-                    .addComponent(notelp, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(nomor, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel5)
@@ -167,9 +223,14 @@ public class PengelolaKontak extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel4)
                     .addComponent(jButton4)
-                    .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(cari, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(23, 23, 23)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton5)
+                    .addComponent(jButton6))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 122, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -184,34 +245,174 @@ public class PengelolaKontak extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(20, Short.MAX_VALUE))
+                .addContainerGap(94, Short.MAX_VALUE))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // TODO add your handling code here:
+        int selectedRow = tblKontak.getSelectedRow();
+        // Validasi field input
+        if (nama.getText().trim().isEmpty() || nomor.getText().trim().isEmpty() || cKategori.getSelectedIndex() == -1) {
+            JOptionPane.showMessageDialog(this, "Semua field harus diisi!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        int id = (int) model.getValueAt(selectedRow, 0);
+        String namaKontak = nama.getText();
+        String nomorTelp = nomor.getText();
+        String kategori = cKategori.getSelectedItem().toString();
+
+        String sql = "UPDATE kontak SET nama = ?, nomor_telepon = ?, kategori = ? WHERE id = ?";
+        try (Connection conn = DatabaseHelper.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, namaKontak);
+            pstmt.setString(2, nomorTelp);
+            pstmt.setString(3, kategori);
+            pstmt.setInt(4, id);
+            pstmt.executeUpdate();
+            JOptionPane.showMessageDialog(this, "Kontak berhasil diubah!");
+            TampilData();
+            bersih();
+            
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    // TODO add your handling code here:
     }//GEN-LAST:event_jButton2ActionPerformed
 
-    private void notelpActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_notelpActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_notelpActionPerformed
+    private void nomorActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_nomorActionPerformed
+        if (!nomor.getText().matches("\\d+")) {
+            JOptionPane.showMessageDialog(this, "Nomor telepon hanya boleh berisi angka!");
+            return;
+        }        // TODO add your handling code here:
+    }//GEN-LAST:event_nomorActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // Validasi field input
+        if (nama.getText().trim().isEmpty() || nomor.getText().trim().isEmpty() || cKategori.getSelectedIndex() == -1) {
+            JOptionPane.showMessageDialog(this, "Semua field harus diisi!", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
         String sql = "INSERT INTO kontak(nama, nomor_telepon, kategori) VALUES(?, ?, ?)";
         try (Connection conn = DatabaseHelper.connect();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, nama.getText());
-            pstmt.setString(2, notelp.getText());
+            pstmt.setString(2, nomor.getText());
             pstmt.setString(3, cKategori.getSelectedItem().toString());
             pstmt.executeUpdate();
+            //menampilkan data padatabel
+            TampilData();
+
+            // Kosongkan input form
+            bersih();
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
             // TODO add your handling code here:
     }//GEN-LAST:event_jButton1ActionPerformed
 
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        int selectedRow = tblKontak.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Pilih kontak yang ingin dihapus!");
+            return;
+        }
+
+        int id = (int) model.getValueAt(selectedRow, 0);
+
+        String sql = "DELETE FROM kontak WHERE id = ?";
+        try (Connection conn = DatabaseHelper.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, id);
+            pstmt.executeUpdate();
+            JOptionPane.showMessageDialog(this, "Kontak berhasil dihapus!");
+            TampilData();
+            bersih();
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+        }        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton3ActionPerformed
+
+    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
+        cariKontak();        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton4ActionPerformed
+
+    private void tblKontakMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_tblKontakMouseClicked
+        // Dapatkan indeks baris yang diklik
+    int selectedRow = tblKontak.getSelectedRow();
+
+    // Pastikan ada baris yang dipilih
+    if (selectedRow != -1) {
+        // Ambil data dari baris yang diklik
+        String namaKontak = model.getValueAt(selectedRow, 1).toString();
+        String nomorTelp = model.getValueAt(selectedRow, 2).toString();
+        String kategori = model.getValueAt(selectedRow, 3).toString();
+
+        // Set data ke TextField dan ComboBox
+        nama.setText(namaKontak);
+        nomor.setText(nomorTelp);
+        cKategori.setSelectedItem(kategori);
+    }
+// TODO add your handling code here:
+    }//GEN-LAST:event_tblKontakMouseClicked
+
+    private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
+    JFileChooser fileChooser = new JFileChooser();
+    fileChooser.setDialogTitle("Pilih File");
+    int userSelection = fileChooser.showOpenDialog(this);
+    if (userSelection == JFileChooser.APPROVE_OPTION) {
+        File fileToOpen = fileChooser.getSelectedFile();
+        try (BufferedReader br = new BufferedReader(new FileReader(fileToOpen))) {
+            String line;
+            model.setRowCount(0); // Hapus data tabel
+            br.readLine(); // Lewati header
+            while ((line = br.readLine()) != null) {
+                String[] data = line.split(",");
+                model.addRow(new Object[]{Integer.parseInt(data[0]), data[1], data[2], data[3]});
+                TampilData();
+            }
+            JOptionPane.showMessageDialog(this, "Data berhasil diimpor!");
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "Error saat mengimpor data: " + e.getMessage());
+        }
+        
+    }
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton5ActionPerformed
+
+    private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
+        JFileChooser fileChooser = new JFileChooser();
+    fileChooser.setDialogTitle("Simpan File");
+    int userSelection = fileChooser.showSaveDialog(this);
+    if (userSelection == JFileChooser.APPROVE_OPTION) {
+        File fileToSave = fileChooser.getSelectedFile();
+        try (FileWriter writer = new FileWriter(fileToSave + ".csv")) {
+            // Tulis header
+            writer.write("ID,Nama,Nomor,Kategori\n");
+            // Tulis data tabel
+            for (int i = 0; i < model.getRowCount(); i++) {
+                for (int j = 0; j < model.getColumnCount(); j++) {
+                    writer.write(model.getValueAt(i, j).toString() + (j < model.getColumnCount() - 1 ? "," : ""));
+                }
+                writer.write("\n");
+            }
+            JOptionPane.showMessageDialog(this, "Data berhasil diekspor!");
+        } catch (IOException ex) {
+                Logger.getLogger(PengelolaKontak.class.getName()).log(Level.SEVERE, null, ex);
+            }}
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton6ActionPerformed
+
+    private void cariKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_cariKeyReleased
+        if(nama.getText().trim().isEmpty()) {
+            TampilData();
+        }// TODO add your handling code here:
+    }//GEN-LAST:event_cariKeyReleased
+
+   
+    
     /**
      * @param args the command line arguments
      */
@@ -249,10 +450,13 @@ public class PengelolaKontak extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox<String> cKategori;
+    private javax.swing.JTextField cari;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
+    private javax.swing.JButton jButton5;
+    private javax.swing.JButton jButton6;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
@@ -260,13 +464,33 @@ public class PengelolaKontak extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel5;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
-    private javax.swing.JTextField jTextField3;
     private javax.swing.JTextField nama;
-    private javax.swing.JTextField notelp;
+    private javax.swing.JTextField nomor;
     private javax.swing.JTable tblKontak;
     // End of variables declaration//GEN-END:variables
 
+    private void cariKontak() {
+        String keyword = cari.getText();
+        model.setRowCount(0);
+        String sql = "SELECT * FROM kontak WHERE nama LIKE ?";
+        try (Connection conn = DatabaseHelper.connect();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, "%" + keyword + "%");
+            ResultSet rs = pstmt.executeQuery();
+            while (rs.next()) {
+                model.addRow(new Object[]{
+                    rs.getInt("id"),
+                    rs.getString("nama"),
+                    rs.getString("nomor_telepon"),
+                    rs.getString("kategori")
+                });
+            }
+        } catch (SQLException e) {
+            System.out.println("Error: " + e.getMessage());
+        }
+    }
     private void TampilData() {
+        model.setRowCount(0);
         String sql = "SELECT * FROM kontak";
         try (Connection conn = DatabaseHelper.connect();
              Statement stmt = conn.createStatement();
@@ -278,5 +502,11 @@ public class PengelolaKontak extends javax.swing.JFrame {
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
+    }
+
+    private void bersih() {
+        nama.setText("");
+        nomor.setText("");
+        cKategori.setSelectedIndex(0);
     }
 }
